@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Style général de la page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        /* Conteneur principal */
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        /* Titre du Chatbot */
+        .chat-header {
+            background-color: #4a90e2;
+            padding: 10px;
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        /* Fenêtre d'affichage des messages */
+        .chat-log {
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        /* Messages de l'utilisateur */
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px 15px 0 15px;
+            max-width: 70%;
+        }
+        /* Messages du bot */
+        .chat-message.bot {
+            align-self: flex-start;
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 15px 15px 15px 0;
+            max-width: 70%;
+        }
+        /* Barre de saisie */
+        .input-bar {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #357ab7;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Chatbot</div>
+        <div class="chat-log" id="chatlog"></div>
+        <div class="input-bar">
+            <input type="text" id="messageText" placeholder="Posez votre question ici...">
+            <button id="send">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+    $('#send').click(function() {
+        var message = $('#messageText').val();
+        if (message.trim() !== "") {
+            $('#chatlog').append('<div class="chat-message user"><b>Vous:</b> ' + message + '</div>');
+            $('#messageText').val('');
+            
+            $.ajax({
+                type: "POST",
+                url: "http://127.0.0.1:5002/ask",
+                contentType: "application/json",  // Spécifiez le type de contenu comme JSON
+                data: JSON.stringify({ messageText: message }),  // Envoyez les données sous forme JSON
+                success: function(response) {
+                    $('#chatlog').append('<div class="chat-message bot"><b>Bot:</b> ' + response.answer + '</div>');
+                    $('#chatlog').scrollTop($('#chatlog')[0].scrollHeight);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Erreur lors de la requête : ", error);
+                }
+            });
+        }
+    });
+
+
+        // Envoi avec la touche "Entrée"
+        $('#messageText').keypress(function(event) {
+            if (event.keyCode === 13) {
+                $('#send').click();
+            }
+        });
+    </script>
+</body>
+</html>
